@@ -28,8 +28,14 @@ Route.group(() => {
   Route.post('/users', 'UsersController.store')
   Route.post('/users/login', 'UsersController.login')
 
+  Route.get('/discussions', 'DiscussionsController.index')
+
   Route.group(() => {
     Route.get('/profile', 'UsersController.profile')
     Route.put('/profile', 'UsersController.update')
+
+    Route.post('/discussions', 'DiscussionsController.store')
+    Route.put('/discussions/:id', 'DiscussionsController.update')
+    Route.delete('/discussions/:id', 'DiscussionsController.delete')
   }).middleware('auth')
 }).prefix('/api/v1')
