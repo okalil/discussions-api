@@ -25,8 +25,11 @@ Route.get('/', async () => {
 })
 
 Route.group(() => {
-  Route.post('/users', () => {})
-  Route.post('/users/login', () => {})
+  Route.post('/users', 'UsersController.store')
+  Route.post('/users/login', 'UsersController.login')
 
-  Route.group(() => {}).middleware('auth')
+  Route.group(() => {
+    Route.get('/profile', 'UsersController.profile')
+    Route.put('/profile', 'UsersController.update')
+  }).middleware('auth')
 }).prefix('/api/v1')
