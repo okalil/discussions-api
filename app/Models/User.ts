@@ -3,6 +3,7 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Discussion from './Discussion'
 import Comment from './Comment'
+import Vote from './Vote'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -28,6 +29,9 @@ export default class User extends BaseModel {
 
   @hasMany(() => Comment)
   public comments: HasMany<typeof Comment>
+
+  @hasMany(() => Vote)
+  public votes: HasMany<typeof Vote>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

@@ -42,5 +42,8 @@ Route.group(() => {
     Route.post('/discussions/:id/comments', 'CommentsController.store')
     Route.put('/discussions/:id/comments/:commentId', 'CommentsController.update')
     Route.delete('/discussions/:id/comments/:commentId', 'CommentsController.destroy')
+
+    Route.post('/discussions/:id/comments/:commentId/votes', 'VotesController.store')
+    Route.delete('/discussions/:id/comments/:commentId/votes', 'VotesController.destroy')
   }).middleware('auth')
 }).prefix('/api/v1')

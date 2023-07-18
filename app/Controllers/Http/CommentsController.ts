@@ -5,7 +5,11 @@ import Discussion from 'App/Models/Discussion'
 
 export default class CommentsController {
   public async index({ params, response }: HttpContextContract) {
-    const comments = await Comment.query().where('discussion_id', params.id)
+    const comments = await Comment.query()
+      .preload('user')
+      .withCount('votes')
+      .orderBy('createdAt', 'desc')
+      .where('discussion_id', params.id)
     response.json({ comments })
   }
 
