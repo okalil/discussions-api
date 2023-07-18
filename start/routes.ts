@@ -29,6 +29,7 @@ Route.group(() => {
   Route.post('/users/login', 'UsersController.login')
 
   Route.get('/discussions', 'DiscussionsController.index')
+  Route.get('/discussions/:id/comments', 'CommentsController.index')
 
   Route.group(() => {
     Route.get('/profile', 'UsersController.profile')
@@ -37,5 +38,9 @@ Route.group(() => {
     Route.post('/discussions', 'DiscussionsController.store')
     Route.put('/discussions/:id', 'DiscussionsController.update')
     Route.delete('/discussions/:id', 'DiscussionsController.delete')
+
+    Route.post('/discussions/:id/comments', 'CommentsController.store')
+    Route.put('/discussions/:id/comments/:commentId', 'CommentsController.update')
+    Route.delete('/discussions/:id/comments/:commentId', 'CommentsController.destroy')
   }).middleware('auth')
 }).prefix('/api/v1')
