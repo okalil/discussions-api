@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Comment from 'App/Models/Comment'
 import Discussion from 'App/Models/Discussion'
+import Ws from 'App/Services/Ws'
 
 export default class CommentsController {
   public async index({ params, response }: HttpContextContract) {
@@ -24,6 +25,9 @@ export default class CommentsController {
       userId: user.id,
       content,
     })
+
+    Ws.io.to(`discussion:${discussion.id}`).emit('comment_new', comment)
+
     response.json({ comment })
   }
 
@@ -40,12 +44,17 @@ export default class CommentsController {
       .firstOrFail()
     await comment.merge({ content }).save()
 
+    Ws.io.to(`discussion:${params.id}`).emit('comment_update', comment)
+
     response.json({ comment })
   }
 
   public async destroy({ params, auth, response }: HttpContextContract) {
     const user = auth.user!
     await user.related('comments').query().where('id', params.commentId).delete()
+
+    Ws.io.to(`discussion:${params.id}`).emit('comment_delete', params.commentId)
+
     response.status(204)
   }
 }

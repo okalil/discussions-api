@@ -1,25 +1,30 @@
 import crypto from 'node:crypto'
 
-import User from 'App/Models/User'
 import Ws from 'App/Services/Ws'
+import User from 'App/Models/User'
 import ApiToken from 'App/Models/ApiToken'
 
 Ws.boot()
 
 Ws.io.use(async (socket, next) => {
   try {
-    const token = socket.handshake.auth?.token
-
-    if (!token || typeof token !== 'string') {
-      throw new Error('E_MISSING_API_TOKEN')
-    }
-
-    socket.data.user = await getUserOrFail(token)
-
+    socket.data.user = await getUserOrFail(socket.handshake.auth?.token)
     next()
   } catch (error) {
     next(error)
   }
+})
+
+Ws.io.on('connection', (socket) => {
+  const userId = socket.data.user.id
+  socket.join(`user:${userId}`)
+
+  socket.on('discussion_subscribe', (id) => {
+    socket.join(`discussion:${id}`)
+  })
+  socket.on('discussion_unsubscribe', (id) => {
+    socket.leave(`discussion:${id}`)
+  })
 })
 
 function parseToken(token: string) {
@@ -48,6 +53,10 @@ function parseToken(token: string) {
 }
 
 async function getUserOrFail(token: string): Promise<User> {
+  if (!token || typeof token !== 'string') {
+    throw new Error('E_MISSING_API_TOKEN')
+  }
+
   const parsedToken = parseToken(token)
   const apiToken = await ApiToken.query()
     .select('userId')

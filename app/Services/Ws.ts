@@ -1,19 +1,9 @@
-import { Server } from 'socket.io'
 import AdonisServer from '@ioc:Adonis/Core/Server'
-import User from 'App/Models/User'
-
-interface ServerToClientEvents {}
-
-interface ClientToServerEvents {}
-
-interface InterServerEvents {}
-
-interface SocketData {
-  user: User
-}
+import { Server } from 'socket.io'
+import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 
 class Ws {
-  public io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
+  public io: Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketData>
   private booted = false
 
   public boot() {
