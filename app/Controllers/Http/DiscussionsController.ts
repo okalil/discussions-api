@@ -1,13 +1,17 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Discussion from 'App/Models/Discussion'
+import Ws from 'App/Services/Ws'
 
 export default class DiscussionsController {
   public async index({ request, response }: HttpContextContract) {
     const page = await request.input('page', 1)
     const limit = await request.input('limit', 10)
 
-    const paginator = await Discussion.query().preload('user').paginate(page, limit)
+    const paginator = await Discussion.query()
+      .preload('user')
+      .withCount('votes')
+      .paginate(page, limit)
     response.json(paginator)
   }
 
@@ -47,6 +51,22 @@ export default class DiscussionsController {
       .firstOrFail()
 
     await discussion.delete()
+    response.status(204)
+  }
+
+  public async like({ response, params, auth }: HttpContextContract) {
+    const discussion = await Discussion.findOrFail(params.id)
+    await discussion.related('votes').create(auth.user!)
+
+    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_up', discussion.id)
+    response.status(204)
+  }
+
+  public async dislike({ response, params, auth }: HttpContextContract) {
+    const discussion = await Discussion.findOrFail(params.id)
+    await discussion.related('votes').detach([auth.user!.id])
+
+    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_up', discussion.id)
     response.status(204)
   }
 }

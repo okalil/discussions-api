@@ -2,15 +2,14 @@ import { DateTime } from 'luxon'
 import {
   BaseModel,
   BelongsTo,
-  HasMany,
+  ManyToMany,
   belongsTo,
   column,
   computed,
-  hasMany,
+  manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
 import Discussion from './Discussion'
 import User from './User'
-import Vote from './Vote'
 
 export default class Comment extends BaseModel {
   @column({ isPrimary: true })
@@ -31,8 +30,8 @@ export default class Comment extends BaseModel {
   @belongsTo(() => Discussion)
   public discussion: BelongsTo<typeof Discussion>
 
-  @hasMany(() => Vote)
-  public votes: HasMany<typeof Vote>
+  @manyToMany(() => User)
+  public votes: ManyToMany<typeof User>
 
   @computed({ serializeAs: 'votes_count' })
   public get votesCount() {

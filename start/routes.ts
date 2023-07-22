@@ -40,12 +40,13 @@ Route.group(() => {
     Route.post('/discussions', 'DiscussionsController.store')
     Route.put('/discussions/:id', 'DiscussionsController.update')
     Route.delete('/discussions/:id', 'DiscussionsController.delete')
+    Route.post('/discussions/:id/votes', 'DiscussionsController.like')
+    Route.delete('/discussions/:id/votes', 'DiscussionsController.dislike')
 
     Route.post('/discussions/:id/comments', 'CommentsController.store')
     Route.put('/discussions/:id/comments/:commentId', 'CommentsController.update')
     Route.delete('/discussions/:id/comments/:commentId', 'CommentsController.destroy')
-
-    Route.post('/discussions/:id/comments/:commentId/votes', 'VotesController.store')
-    Route.delete('/discussions/:id/comments/:commentId/votes', 'VotesController.destroy')
+    Route.post('/discussions/:id/comments/:commentId/votes', 'CommentsController.like')
+    Route.delete('/discussions/:id/comments/:commentId/votes', 'CommentsController.dislike')
   }).middleware('auth')
 }).prefix('/api/v1')

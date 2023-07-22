@@ -1,5 +1,15 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, HasMany, belongsTo, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  BelongsTo,
+  HasMany,
+  ManyToMany,
+  belongsTo,
+  column,
+  computed,
+  hasMany,
+  manyToMany,
+} from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
 import Comment from './Comment'
 
@@ -21,6 +31,14 @@ export default class Discussion extends BaseModel {
 
   @hasMany(() => Comment)
   public comments: HasMany<typeof Comment>
+
+  @manyToMany(() => User)
+  public votes: ManyToMany<typeof User>
+
+  @computed({ serializeAs: 'votes_count' })
+  public get votesCount() {
+    return this.$extras.votes_count
+  }
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

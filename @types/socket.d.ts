@@ -6,11 +6,13 @@ interface SocketData {
 }
 
 interface ServerToClientEvents {
+  discussion_vote_up: (discussionId: number) => void
+  discussion_vote_down: (discussionId: number) => void
   comment_new: (comment: Comment) => void
   comment_update: (comment: Comment) => void
   comment_delete: (commentId: number) => void
-  vote_up: (commentId: number) => void
-  vote_down: (commentId: number) => void
+  comment_vote_up: (commentId: number) => void
+  comment_vote_down: (commentId: number) => void
 }
 
 interface ClientToServerEvents {

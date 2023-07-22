@@ -57,4 +57,20 @@ export default class CommentsController {
 
     response.status(204)
   }
+
+  public async like({ response, params, auth }: HttpContextContract) {
+    const comment = await Comment.findOrFail(params.commentId)
+    await comment.related('votes').create(auth.user!)
+
+    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_up', comment.id)
+    response.status(204)
+  }
+
+  public async dislike({ response, params, auth }: HttpContextContract) {
+    const comment = await Comment.findOrFail(params.commentId)
+    await comment.related('votes').detach([auth.user!.id])
+
+    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_up', comment.id)
+    response.status(204)
+  }
 }
