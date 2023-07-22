@@ -31,6 +31,7 @@ Route.group(() => {
   Route.post('/users/login', 'UsersController.login')
 
   Route.get('/discussions', 'DiscussionsController.index')
+  Route.get('/discussions/:id', 'DiscussionsController.show')
   Route.get('/discussions/:id/comments', 'CommentsController.index')
 
   Route.group(() => {

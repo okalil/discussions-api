@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import Drive from '@ioc:Adonis/Core/Drive'
 import Discussion from 'App/Models/Discussion'
 import Ws from 'App/Services/Ws'
 
@@ -10,9 +11,29 @@ export default class DiscussionsController {
 
     const paginator = await Discussion.query()
       .preload('user')
+      .withCount('comments')
       .withCount('votes')
       .paginate(page, limit)
+    await Promise.all(
+      paginator.all().map(async (it) => {
+        if (it.user.picture) it.user.picture = await Drive.getUrl(it.user.picture)
+      })
+    )
+
     response.json(paginator)
+  }
+
+  public async show({ response, params }: HttpContextContract) {
+    const discussion = await Discussion.query()
+      .where('id', params.id)
+      .preload('user')
+      .withCount('votes')
+      .withCount('comments')
+      .firstOrFail()
+    if (discussion.user.picture)
+      discussion.user.picture = await Drive.getUrl(discussion.user.picture)
+
+    response.json({ discussion })
   }
 
   public async store({ request, response, auth }: HttpContextContract) {

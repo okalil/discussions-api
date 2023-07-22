@@ -35,9 +35,8 @@ export default class Discussion extends BaseModel {
   @manyToMany(() => User)
   public votes: ManyToMany<typeof User>
 
-  @computed({ serializeAs: 'votes_count' })
-  public get votesCount() {
-    return this.$extras.votes_count
+  public serializeExtras() {
+    return this.$extras
   }
 
   @column.dateTime({ autoCreate: true })
