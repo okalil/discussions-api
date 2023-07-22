@@ -70,7 +70,7 @@ export default class CommentsController {
     const comment = await Comment.findOrFail(params.commentId)
     await comment.related('votes').detach([auth.user!.id])
 
-    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_up', comment.id)
+    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_down', comment.id)
     response.status(204)
   }
 }

@@ -66,7 +66,7 @@ export default class DiscussionsController {
     const discussion = await Discussion.findOrFail(params.id)
     await discussion.related('votes').detach([auth.user!.id])
 
-    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_up', discussion.id)
+    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_down', discussion.id)
     response.status(204)
   }
 }
