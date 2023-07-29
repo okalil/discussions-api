@@ -22,6 +22,7 @@ export default class CommentsController {
 
   public async show({ auth, params, response }: HttpContextContract) {
     const comment = await Comment.query()
+      .where('id', params.commentId)
       .preload('user')
       .withCount('votes')
       .withAggregate('votes', (query) => {
@@ -30,8 +31,6 @@ export default class CommentsController {
           .where('user_id', auth.user?.id ?? 0)
           .as('user_voted')
       })
-      .orderBy('createdAt', 'asc')
-      .where('discussionId', params.id)
       .firstOrFail()
     response.json({ comment })
   }
