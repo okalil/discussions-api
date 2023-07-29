@@ -5,10 +5,16 @@ import Discussion from 'App/Models/Discussion'
 import Ws from 'App/Services/Ws'
 
 export default class CommentsController {
-  public async index({ params, response }: HttpContextContract) {
+  public async index({ auth, params, response }: HttpContextContract) {
     const comments = await Comment.query()
       .preload('user')
       .withCount('votes')
+      .withAggregate('votes', (query) => {
+        query
+          .count('*')
+          .where('user_id', auth.user?.id ?? 0)
+          .as('user_voted')
+      })
       .orderBy('createdAt', 'asc')
       .where('discussion_id', params.id)
     response.json({ comments })

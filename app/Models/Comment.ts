@@ -38,6 +38,11 @@ export default class Comment extends BaseModel {
     return this.$extras.votes_count
   }
 
+  @computed({ serializeAs: 'user_voted' })
+  public get userVoted() {
+    return !!this.$extras.user_voted
+  }
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
