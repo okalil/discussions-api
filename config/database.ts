@@ -8,6 +8,9 @@
 import Env from '@ioc:Adonis/Core/Env'
 import Application from '@ioc:Adonis/Core/Application'
 import type { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
+import pg from 'pg'
+
+pg.types.setTypeParser(20, 'text', parseInt)
 
 const databaseConfig: DatabaseConfig = {
   /*
@@ -42,7 +45,7 @@ const databaseConfig: DatabaseConfig = {
       pool: {
         afterCreate: (conn, cb) => {
           conn.run('PRAGMA foreign_keys=true', cb)
-        }
+        },
       },
       migrations: {
         naturalSort: true,
@@ -52,7 +55,22 @@ const databaseConfig: DatabaseConfig = {
       debug: false,
     },
 
-  }
+    pg: {
+      client: 'pg',
+      connection: {
+        host: Env.get('PG_HOST'),
+        port: Env.get('PG_PORT'),
+        user: Env.get('PG_USER'),
+        password: Env.get('PG_PASSWORD', ''),
+        database: Env.get('PG_DB_NAME'),
+        ssl: true,
+      },
+      migrations: {
+        naturalSort: true,
+      },
+      debug: false,
+    },
+  },
 }
 
 export default databaseConfig
