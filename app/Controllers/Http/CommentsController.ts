@@ -1,6 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Drive from '@ioc:Adonis/Core/Drive'
 import Comment from 'App/Models/Comment'
 import Discussion from 'App/Models/Discussion'
 import Ws from 'App/Services/Ws'
@@ -12,11 +11,6 @@ export default class CommentsController {
       .withCount('votes')
       .orderBy('createdAt', 'asc')
       .where('discussion_id', params.id)
-    await Promise.all(
-      comments.map(async (it) => {
-        if (it.user.picture) it.user.picture = await Drive.getUrl(it.user.picture)
-      })
-    )
     response.json({ comments })
   }
 
@@ -33,7 +27,6 @@ export default class CommentsController {
       .orderBy('createdAt', 'asc')
       .where('discussionId', params.id)
       .firstOrFail()
-    if (comment.user.picture) comment.user.picture = await Drive.getUrl(comment.user.picture)
     response.json({ comment })
   }
 
@@ -49,7 +42,6 @@ export default class CommentsController {
       content,
     })
     await comment.load('user')
-    if (comment.user.picture) comment.user.picture = await Drive.getUrl(comment.user.picture)
 
     Ws.io.to(`discussion:${discussion.id}`).emit('comment_new', comment)
 

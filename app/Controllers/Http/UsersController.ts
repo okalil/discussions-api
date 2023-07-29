@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Drive from '@ioc:Adonis/Core/Drive'
+import { Attachment } from '@ioc:Adonis/Addons/AttachmentLite'
 import User from 'App/Models/User'
 
 export default class UsersController {
@@ -26,7 +26,6 @@ export default class UsersController {
 
   public async profile({ auth, response }: HttpContextContract) {
     const user = auth.user!
-    if (user.picture) user.picture = await Drive.getUrl(user.picture)
     response.json({ user })
   }
 
@@ -40,9 +39,7 @@ export default class UsersController {
       }),
     })
     if (picture) {
-      await picture.moveToDisk('./')
-      if (user.picture) await Drive.delete(user.picture)
-      user.picture = picture.fileName ?? null
+      user.picture = Attachment.fromFile(picture)
     }
     await user.merge(data).save()
     response.json({ user })
