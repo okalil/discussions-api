@@ -30,9 +30,12 @@ Route.group(() => {
   Route.post('/users', 'UsersController.store')
   Route.post('/users/login', 'UsersController.login')
 
-  Route.get('/discussions', 'DiscussionsController.index')
-  Route.get('/discussions/:id', 'DiscussionsController.show')
-  Route.get('/discussions/:id/comments', 'CommentsController.index')
+  Route.group(() => {
+    Route.get('/discussions', 'DiscussionsController.index')
+    Route.get('/discussions/:id', 'DiscussionsController.show')
+    Route.get('/discussions/:id/comments', 'CommentsController.index')
+    Route.get('/discussions/:id/comments/:commentId', 'CommentsController.show')
+  }).middleware('silentAuth')
 
   Route.group(() => {
     Route.get('/profile', 'UsersController.profile')

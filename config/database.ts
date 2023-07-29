@@ -10,7 +10,7 @@ import Application from '@ioc:Adonis/Core/Application'
 import type { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 import pg from 'pg'
 
-pg.types.setTypeParser(20, 'text', parseInt)
+pg.defaults.parseInt8 = true
 
 const databaseConfig: DatabaseConfig = {
   /*

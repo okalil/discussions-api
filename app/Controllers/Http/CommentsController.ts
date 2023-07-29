@@ -20,6 +20,23 @@ export default class CommentsController {
     response.json({ comments })
   }
 
+  public async show({ auth, params, response }: HttpContextContract) {
+    const comment = await Comment.query()
+      .preload('user')
+      .withCount('votes')
+      .withAggregate('votes', (query) => {
+        query
+          .count('*')
+          .where('user_id', auth.user?.id ?? 0)
+          .as('user_voted')
+      })
+      .orderBy('createdAt', 'asc')
+      .where('discussionId', params.id)
+      .firstOrFail()
+    if (comment.user.picture) comment.user.picture = await Drive.getUrl(comment.user.picture)
+    response.json({ comment })
+  }
+
   public async store({ params, auth, request, response }: HttpContextContract) {
     const user = auth.user!
     const { content } = await request.validate({
@@ -52,7 +69,7 @@ export default class CommentsController {
       .firstOrFail()
     await comment.merge({ content }).save()
 
-    Ws.io.to(`discussion:${params.id}`).emit('comment_update', comment)
+    Ws.io.to(`discussion:${params.id}`).emit('comment_update', comment.id)
 
     response.json({ comment })
   }
@@ -67,18 +84,18 @@ export default class CommentsController {
   }
 
   public async like({ response, params, auth }: HttpContextContract) {
+    const user = auth.user!
     const comment = await Comment.findOrFail(params.commentId)
-    await comment.related('votes').create(auth.user!)
-
-    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_up', comment.id)
+    await comment.related('votes').create(user)
+    Ws.io.to(`discussion:${params.id}`).emit('comment_update', comment.id)
     response.status(204)
   }
 
   public async dislike({ response, params, auth }: HttpContextContract) {
+    const user = auth.user!
     const comment = await Comment.findOrFail(params.commentId)
-    await comment.related('votes').detach([auth.user!.id])
-
-    Ws.io.to(`discussion:${params.id}`).emit('comment_vote_down', comment.id)
+    await comment.related('votes').detach([user.id])
+    Ws.io.to(`discussion:${params.id}`).emit('comment_update', comment.id)
     response.status(204)
   }
 }
