@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+import crypto from 'crypto'
 
 import Ws from 'App/Services/Ws'
 import User from 'App/Models/User'
