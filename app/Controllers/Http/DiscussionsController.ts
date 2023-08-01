@@ -4,7 +4,7 @@ import Discussion from 'App/Models/Discussion'
 import Ws from 'App/Services/Ws'
 
 export default class DiscussionsController {
-  public async index({ request, response }: HttpContextContract) {
+  public async index({ auth, request, response }: HttpContextContract) {
     const page = await request.input('page', 1)
     const limit = await request.input('limit', 10)
 
@@ -12,17 +12,29 @@ export default class DiscussionsController {
       .preload('user')
       .withCount('comments')
       .withCount('votes')
+      .withAggregate('votes', (query) => {
+        query
+          .count('*')
+          .where('user_id', auth.user?.id ?? 0)
+          .as('user_voted')
+      })
       .paginate(page, limit)
 
     response.json(paginator)
   }
 
-  public async show({ response, params }: HttpContextContract) {
+  public async show({ auth, response, params }: HttpContextContract) {
     const discussion = await Discussion.query()
       .where('id', params.id)
       .preload('user')
-      .withCount('votes')
       .withCount('comments')
+      .withCount('votes')
+      .withAggregate('votes', (query) => {
+        query
+          .count('*')
+          .where('user_id', auth.user?.id ?? 0)
+          .as('user_voted')
+      })
       .firstOrFail()
 
     response.json({ discussion })
@@ -71,7 +83,7 @@ export default class DiscussionsController {
     const discussion = await Discussion.findOrFail(params.id)
     await discussion.related('votes').create(auth.user!)
 
-    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_up', discussion.id)
+    Ws.io.to(`discussion:${params.id}`).emit('discussion_update', discussion.id)
     response.status(204)
   }
 
@@ -79,7 +91,7 @@ export default class DiscussionsController {
     const discussion = await Discussion.findOrFail(params.id)
     await discussion.related('votes').detach([auth.user!.id])
 
-    Ws.io.to(`discussion:${params.id}`).emit('discussion_vote_down', discussion.id)
+    Ws.io.to(`discussion:${params.id}`).emit('discussion_update', discussion.id)
     response.status(204)
   }
 }

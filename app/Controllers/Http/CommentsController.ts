@@ -47,6 +47,7 @@ export default class CommentsController {
       content,
     })
     await comment.load('user')
+    await comment.loadCount('votes')
 
     Ws.io.to(`discussion:${discussion.id}`).emit('comment_new', comment)
 
@@ -73,7 +74,13 @@ export default class CommentsController {
 
   public async destroy({ params, auth, response }: HttpContextContract) {
     const user = auth.user!
-    await user.related('comments').query().where('id', params.commentId).delete()
+    const comment = await user
+      .related('comments')
+      .query()
+      .where('id', params.commentId)
+      .firstOrFail()
+    await comment.related('votes').detach()
+    await comment.delete()
 
     Ws.io.to(`discussion:${params.id}`).emit('comment_delete', params.commentId)
 

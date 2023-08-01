@@ -6,6 +6,7 @@ import {
   ManyToMany,
   belongsTo,
   column,
+  computed,
   hasMany,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
@@ -34,8 +35,19 @@ export default class Discussion extends BaseModel {
   @manyToMany(() => User)
   public votes: ManyToMany<typeof User>
 
-  public serializeExtras() {
-    return this.$extras
+  @computed({ serializeAs: 'votes_count' })
+  public get votesCount() {
+    return this.$extras.votes_count
+  }
+
+  @computed({ serializeAs: 'comments_count' })
+  public get commentsCount() {
+    return this.$extras.comments_count
+  }
+
+  @computed({ serializeAs: 'user_voted' })
+  public get userVoted() {
+    return !!this.$extras.user_voted
   }
 
   @column.dateTime({ autoCreate: true })
