@@ -7,8 +7,11 @@ export default class DiscussionsController {
   public async index({ auth, request, response }: HttpContextContract) {
     const page = await request.input('page', 1)
     const limit = await request.input('limit', 10)
+    const q: string = await request.input('q', '')
 
     const paginator = await Discussion.query()
+      .whereILike('title', `%${q}%`)
+      .orWhereILike('description', `%${q}%`)
       .preload('user')
       .withCount('comments')
       .withCount('votes')
